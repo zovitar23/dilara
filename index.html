@@ -1,0 +1,972 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sessiz Sayfalar</title>
+  <style>
+    :root {
+      --bg-1: #4b453f;
+      --bg-2: #2f2b28;
+      --paper: #d9d4cd;
+      --paper-edge: #c2bbb1;
+      --ink: #1f1b18;
+      --muted: rgba(31, 27, 24, 0.62);
+      --shadow: 0 30px 90px rgba(8, 8, 8, 0.45);
+      --page-shadow: 0 18px 40px rgba(18, 18, 18, 0.22);
+      --line: rgba(58, 52, 46, 0.18);
+      --accent: #6b625a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,0.04), transparent 36%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-2));
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.04), transparent 42%),
+        linear-gradient(90deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06), rgba(255,255,255,0.02));
+      opacity: 0.72;
+      pointer-events: none;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(rgba(0, 0, 0, 0.08) 0.6px, transparent 0.8px),
+        radial-gradient(rgba(255,255,255,0.03) 0.6px, transparent 0.8px);
+      background-position: 0 0, 18px 14px;
+      background-size: 24px 24px, 32px 32px;
+      opacity: 0.2;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+    }
+
+    .layout {
+      width: min(1000px, 100%);
+      position: relative;
+    }
+
+    .book {
+      position: relative;
+      width: min(1000px, 100%);
+      aspect-ratio: 1.5 / 1;
+      min-height: 560px;
+      max-height: min(82vh, 760px);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.08)),
+        linear-gradient(180deg, rgba(90, 82, 74, 0.16), rgba(34, 31, 28, 0.28));
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      box-shadow: 0 30px 90px rgba(6, 6, 6, 0.5);
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .admin-panel {
+      position: fixed;
+      top: 22px;
+      right: 22px;
+      width: min(340px, calc(100vw - 32px));
+      min-height: 0;
+      padding: 22px 18px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.12)),
+        linear-gradient(180deg, rgba(90, 82, 74, 0.14), rgba(34, 31, 28, 0.32));
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      box-shadow: 0 30px 90px rgba(6, 6, 6, 0.34);
+      color: #e4ddd4;
+      z-index: 30;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px) scale(0.98);
+      transition: opacity 220ms ease, transform 220ms ease, visibility 220ms ease;
+    }
+
+    .admin-panel.is-open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    .admin-toggle {
+      position: fixed;
+      top: 22px;
+      right: 22px;
+      z-index: 31;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(24, 21, 19, 0.74);
+      color: rgba(245, 238, 230, 0.8);
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      cursor: pointer;
+      font: inherit;
+      display: grid;
+      place-items: center;
+      transition: transform 180ms ease, opacity 180ms ease, border-color 180ms ease;
+    }
+
+    .admin-toggle:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    .admin-panel h2 {
+      margin: 0 0 6px;
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 1.55rem;
+      font-weight: 500;
+      color: #f2ebe2;
+    }
+
+    .admin-text {
+      margin: 0 0 18px;
+      color: rgba(228, 221, 212, 0.66);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    .admin-lock,
+    .admin-editor {
+      display: grid;
+      gap: 12px;
+    }
+
+    .admin-editor[hidden] {
+      display: none;
+    }
+
+    .admin-label {
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(228, 221, 212, 0.68);
+    }
+
+    .admin-input,
+    .admin-select,
+    .admin-textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.06);
+      color: #f5eee6;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font: inherit;
+      outline: none;
+    }
+
+    .admin-input:focus,
+    .admin-select:focus,
+    .admin-textarea:focus {
+      border-color: rgba(255,255,255,0.18);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+    }
+
+    .admin-textarea {
+      min-height: 148px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .admin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .admin-button {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(222, 218, 211, 0.12);
+      color: #f5eee6;
+      padding: 11px 14px;
+      border-radius: 999px;
+      font: inherit;
+      cursor: pointer;
+      transition: transform 180ms ease, opacity 180ms ease, border-color 180ms ease;
+    }
+
+    .admin-button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    .admin-status {
+      min-height: 1.4em;
+      font-size: 0.9rem;
+      color: rgba(245, 238, 230, 0.72);
+    }
+
+    .book::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,0.04), transparent 44%),
+        linear-gradient(90deg, rgba(255,255,255,0.04), transparent 48%, rgba(0,0,0,0.06));
+      pointer-events: none;
+    }
+
+    .book::after {
+      content: "";
+      position: absolute;
+      top: 3%;
+      bottom: 3%;
+      left: 18px;
+      width: 3px;
+      background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.16), transparent);
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+      pointer-events: none;
+    }
+
+    .paper-texture {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 16%, rgba(120, 114, 106, 0.08), transparent 22%),
+        radial-gradient(circle at 78% 70%, rgba(120, 114, 106, 0.06), transparent 20%),
+        radial-gradient(circle at 35% 84%, rgba(255,255,255,0.12), transparent 20%);
+      mix-blend-mode: multiply;
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .page-stack {
+      position: absolute;
+      inset: 12px 12px 74px 14px;
+      perspective: 2000px;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      border-radius: 2px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.06), transparent 18%),
+        linear-gradient(180deg, #ddd9d2, var(--paper));
+      border: 1px solid var(--line);
+      box-shadow: var(--page-shadow);
+      padding: clamp(28px, 5vw, 54px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      transform-origin: left center;
+      transition:
+        transform 900ms cubic-bezier(0.2, 0.74, 0.18, 1),
+        opacity 500ms ease,
+        filter 900ms ease;
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .page::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(115, 107, 98, 0.08), transparent 20%),
+        repeating-linear-gradient(
+          180deg,
+          transparent 0 38px,
+          rgba(98, 92, 85, 0.04) 38px 39px
+        ),
+        radial-gradient(rgba(80, 73, 66, 0.05) 0.6px, transparent 0.8px);
+      background-size: auto, auto, 18px 18px;
+      opacity: 0.56;
+      pointer-events: none;
+    }
+
+    .page::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 18%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.06));
+      opacity: 0;
+      transition: opacity 500ms ease;
+      pointer-events: none;
+    }
+
+    .page.is-current::after {
+      opacity: 1;
+    }
+
+    .page.is-hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(0) rotateY(-178deg) scale(0.985);
+      filter: blur(0.5px);
+    }
+
+    .page.is-next {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(16px) scale(0.985);
+      filter: saturate(0.85);
+    }
+
+    .page.is-current {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0) rotateY(0deg) scale(1);
+      filter: none;
+      z-index: 3;
+    }
+
+    .page.is-prev {
+      opacity: 0.14;
+      pointer-events: none;
+      transform: translateX(-8px) scale(0.99);
+      z-index: 1;
+    }
+
+    .page-content {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 760px);
+      display: grid;
+      gap: 24px;
+      justify-items: start;
+      padding-left: clamp(20px, 4vw, 54px);
+      padding-right: clamp(18px, 3vw, 34px);
+      padding-bottom: 58px;
+    }
+
+    .page-number {
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .quote {
+      margin: 0;
+      font-family: "Georgia", "Times New Roman", serif;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 1.34;
+      font-size: clamp(2rem, 4.4vw, 4rem);
+      letter-spacing: 0;
+      text-wrap: pretty;
+      max-width: 18ch;
+      text-shadow: none;
+    }
+
+    .note {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: clamp(1.3rem, 2vw, 2rem);
+      font-style: italic;
+      line-height: 1.4;
+      max-width: 28ch;
+      color: var(--ink);
+    }
+
+    .signature-image {
+      width: clamp(272px, 38.4vw, 464px);
+      height: auto;
+      display: block;
+      object-fit: contain;
+      opacity: 0.92;
+      filter: grayscale(1) brightness(0.18);
+      margin-left: -18px;
+      justify-self: start;
+    }
+
+    .controls {
+      position: absolute;
+      left: 50%;
+      bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 26px;
+      z-index: 5;
+      transform: translateX(-50%);
+    }
+
+    .control-arrow {
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      width: 56px;
+      height: 56px;
+      font: inherit;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 1.8rem;
+      line-height: 1;
+      opacity: 0.7;
+      transition: transform 220ms ease, opacity 220ms ease;
+    }
+
+    .control-arrow:hover {
+      transform: translateY(-2px);
+      opacity: 1;
+    }
+
+    .control-arrow:disabled {
+      opacity: 0.24;
+      cursor: default;
+      transform: none;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        overflow: auto;
+      }
+
+      .app {
+        padding: 16px;
+      }
+
+      .layout {
+        width: 100%;
+      }
+
+      .book {
+        min-height: 100svh;
+        max-height: none;
+        aspect-ratio: auto;
+        border-radius: 8px;
+      }
+
+      .admin-panel {
+        top: 70px;
+        right: 16px;
+        left: 16px;
+        width: auto;
+      }
+
+      .page-stack {
+        inset: 12px 12px 78px;
+      }
+
+      .page {
+        padding: 28px 22px;
+      }
+
+      .controls {
+        bottom: 14px;
+      }
+
+      .control-arrow {
+        width: 48px;
+        height: 48px;
+        font-size: 1.55rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition-duration: 0ms !important;
+      }
+    }
+
+    @keyframes drift {
+      from {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      to {
+        transform: translate3d(0, -20px, 0) scale(1.03);
+      }
+    }
+
+    @keyframes nudge {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      50% {
+        transform: translateX(5px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="layout">
+      <button class="admin-toggle" id="adminToggle" type="button" aria-label="Yönetim panelini aç">✦</button>
+      <div class="book" aria-label="Dijital şiir defteri">
+        <div class="paper-texture" aria-hidden="true"></div>
+        <div class="doodles" aria-hidden="true">
+          <svg class="doodle doodle-top-left" viewBox="0 0 120 120">
+            <path d="M22 76c18-34 42-46 70-36M36 90c12-22 29-33 53-31M54 28c3 7 3 14 0 21M44 38c7-3 14-3 21 0" />
+            <path d="M78 24c8 8 9 18 4 30" />
+          </svg>
+          <svg class="doodle doodle-top-right" viewBox="0 0 120 120">
+            <path d="M20 50c14-18 32-28 54-30 14 0 23 5 28 16" />
+            <path d="M28 72c18 10 38 12 60 6" />
+            <path d="M40 38l10 12 12-10" />
+          </svg>
+          <svg class="doodle doodle-bottom-left" viewBox="0 0 120 120">
+            <path d="M24 80c16-14 30-22 44-24 13 0 23 5 30 16" />
+            <path d="M35 54c0-11 6-19 16-24 12-4 22-1 31 9" />
+          </svg>
+          <svg class="doodle doodle-bottom-right" viewBox="0 0 160 120">
+            <path d="M20 72c22-24 44-36 68-36 20 2 36 13 48 34" />
+            <path d="M40 90c26-8 50-8 74 0" />
+            <path d="M106 22c2 8 2 15 0 22M95 32c7-3 14-3 21 0" />
+          </svg>
+        </div>
+        <div class="page-stack" id="pageStack"></div>
+      </div>
+      <aside class="admin-panel" id="adminPanel" aria-label="Yönetim paneli">
+        <h2>Yönetim</h2>
+        <p class="admin-text">Şifre doğruysa şiirleri tek tek düzenleyebilirsin. Değişiklikler bu tarayıcıda saklanır.</p>
+
+        <div class="admin-lock" id="adminLock">
+          <label class="admin-label" for="adminPassword">Admin Şifresi</label>
+          <input class="admin-input" id="adminPassword" type="password" placeholder="Şifre gir">
+          <div class="admin-actions">
+            <button class="admin-button" id="unlockButton" type="button">Paneli Aç</button>
+          </div>
+          <div class="admin-status" id="adminStatus"></div>
+        </div>
+
+        <div class="admin-editor" id="adminEditor" hidden>
+          <label class="admin-label" for="pageSelect">Sayfa</label>
+          <select class="admin-select" id="pageSelect"></select>
+
+          <label class="admin-label" for="quoteInput">Şiir</label>
+          <textarea class="admin-textarea" id="quoteInput"></textarea>
+
+          <label class="admin-label" for="authorInput">Şair</label>
+          <input class="admin-input" id="authorInput" type="text" placeholder="Şair adı">
+
+          <div class="admin-actions">
+            <button class="admin-button" id="addPageButton" type="button">Yeni Sayfa Ekle</button>
+            <button class="admin-button" id="saveButton" type="button">Kaydet</button>
+            <button class="admin-button" id="resetPageButton" type="button">Bu Sayfayı Sıfırla</button>
+            <button class="admin-button" id="resetAllButton" type="button">Hepsini Sıfırla</button>
+          </div>
+          <div class="admin-status" id="editorStatus"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = "DİLARAM";
+    const STORAGE_KEY = "love-diary-poems-v1";
+    const BLANK_PAGE = {
+      quote: "Yeni bir şiir ekle...",
+      note: "Anonim"
+    };
+
+    const defaultQuotes = [
+      {
+        quote: "Sevelim sevilelim, dünya kimseye kalmaz.",
+        note: "Yunus Emre"
+      },
+      {
+        quote: "Aşk imiş her ne var âlemde.",
+        note: "Fuzûlî"
+      },
+      {
+        quote: "Canı cânâna vermekdir kemâli âşıkın.",
+        note: "Şeyh Gâlib"
+      },
+      {
+        quote: "Ben yürürüm yâne yâne.",
+        note: "Yunus Emre"
+      },
+      {
+        quote: "Bana seni gerek seni.",
+        note: "Yunus Emre"
+      },
+      {
+        quote: "Seni ben canımın içinde saklarım.",
+        note: "Yunus Emre"
+      },
+      {
+        quote: "Aşkın aldı benden beni.",
+        note: "Yunus Emre"
+      },
+      {
+        quote: "Bir ben vardır bende benden içeri.",
+        note: "Yunus Emre"
+      },
+      {
+        quote: "Yâr yolunda can vermeye bin cânım olsun isterim.",
+        note: "Fuzûlî"
+      },
+      {
+        quote: "Âşıka Bağdat sorulmaz, gönül neredeyse vatan odur.",
+        note: "Fuzûlî"
+      },
+      {
+        quote: "Sensiz bana cihan nedir, bir tenha köşeden ibaret.",
+        note: "Fuzûlî"
+      },
+      {
+        quote: "Gönlümün tahtına senden başka sultan gerekmez.",
+        note: "Şeyh Gâlib"
+      },
+      {
+        quote: "Bir ateş yakmışım ki içimde, adı sen.",
+        note: "Şeyh Gâlib"
+      },
+      {
+        quote: "Sana vardığım yerde bütün yollar biter.",
+        note: "Şeyh Gâlib"
+      },
+      {
+        quote: "Gözlerin değince dünya biraz daha güzel oluyor.",
+        note: "Anonim"
+      },
+      {
+        quote: "Adını andığım her yerde içim biraz daha sana dönüyor.",
+        note: "Anonim"
+      },
+      {
+        quote: "Bir çift gözde kaybolup bütün dünyayı unuttum.",
+        note: "Anonim"
+      },
+      {
+        quote: "Kalbim sana alışmadı, kalbim seni yuva bildi.",
+        note: "Anonim"
+      },
+      {
+        quote: "Sen yanımda olunca susmak bile şiir gibi.",
+        note: "Anonim"
+      },
+      {
+        quote: "İçimde en çok sana benzeyen yer kalbim oldu.",
+        note: "Anonim"
+      }
+    ];
+
+    function loadQuotes() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return defaultQuotes.map((entry) => ({ ...entry }));
+
+      try {
+        const parsed = JSON.parse(saved);
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+          return defaultQuotes.map((entry) => ({ ...entry }));
+        }
+        return parsed.map((entry, index) => ({
+          quote: entry.quote || defaultQuotes[index]?.quote || BLANK_PAGE.quote,
+          note: entry.note || defaultQuotes[index]?.note || BLANK_PAGE.note
+        }));
+      } catch {
+        return defaultQuotes.map((entry) => ({ ...entry }));
+      }
+    }
+
+    let quotes = loadQuotes();
+    const pageStack = document.getElementById("pageStack");
+    const adminToggle = document.getElementById("adminToggle");
+    const adminPanel = document.getElementById("adminPanel");
+    const adminPassword = document.getElementById("adminPassword");
+    const unlockButton = document.getElementById("unlockButton");
+    const adminStatus = document.getElementById("adminStatus");
+    const adminEditor = document.getElementById("adminEditor");
+    const pageSelect = document.getElementById("pageSelect");
+    const quoteInput = document.getElementById("quoteInput");
+    const authorInput = document.getElementById("authorInput");
+    const addPageButton = document.getElementById("addPageButton");
+    const saveButton = document.getElementById("saveButton");
+    const resetPageButton = document.getElementById("resetPageButton");
+    const resetAllButton = document.getElementById("resetAllButton");
+    const editorStatus = document.getElementById("editorStatus");
+    let currentIndex = 0;
+    let audioContext;
+
+    function playPageFlip() {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+
+      if (!audioContext) {
+        audioContext = new AudioContextClass();
+      }
+
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+
+      const duration = 0.42;
+      const sampleRate = audioContext.sampleRate;
+      const buffer = audioContext.createBuffer(1, sampleRate * duration, sampleRate);
+      const data = buffer.getChannelData(0);
+
+      for (let i = 0; i < data.length; i += 1) {
+        const t = i / data.length;
+        const noise = (Math.random() * 2 - 1);
+        const flutter = Math.sin(t * Math.PI * 10) * 0.12;
+        const envelope =
+          Math.exp(-t * 7.5) * 0.12 +
+          Math.exp(-Math.pow((t - 0.22) / 0.11, 2)) * 0.09 +
+          Math.exp(-Math.pow((t - 0.34) / 0.08, 2)) * 0.05;
+
+        data[i] = (noise + flutter) * envelope;
+      }
+
+      const source = audioContext.createBufferSource();
+      const lowpass = audioContext.createBiquadFilter();
+      const highpass = audioContext.createBiquadFilter();
+      const gain = audioContext.createGain();
+
+      source.buffer = buffer;
+      highpass.type = "highpass";
+      highpass.frequency.value = 320;
+      highpass.Q.value = 0.7;
+
+      lowpass.type = "lowpass";
+      lowpass.frequency.value = 2100;
+      lowpass.Q.value = 0.5;
+
+      const now = audioContext.currentTime;
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.18, now + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.08, now + 0.18);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+      source.connect(highpass);
+      highpass.connect(lowpass);
+      lowpass.connect(gain);
+      gain.connect(audioContext.destination);
+      source.start(now);
+      source.stop(now + duration);
+    }
+
+    function goToPage(nextIndex) {
+      if (nextIndex === currentIndex || nextIndex < 0 || nextIndex >= quotes.length) return;
+      currentIndex = nextIndex;
+      updateBook();
+      playPageFlip();
+      syncEditorFields();
+    }
+
+    function populatePageSelect() {
+      pageSelect.innerHTML = quotes
+        .map((_, index) => `<option value="${index}">Sayfa ${index + 1}</option>`)
+        .join("");
+    }
+
+    function syncEditorFields() {
+      if (adminEditor.hidden) return;
+      pageSelect.value = String(currentIndex);
+      quoteInput.value = quotes[currentIndex].quote;
+      authorInput.value = quotes[currentIndex].note;
+    }
+
+    function saveQuotes() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(quotes));
+    }
+
+    function getDefaultEntry(index) {
+      return defaultQuotes[index] ? { ...defaultQuotes[index] } : { ...BLANK_PAGE };
+    }
+
+    function renderPages() {
+      pageStack.innerHTML = "";
+
+      quotes.forEach((entry, index) => {
+        const page = document.createElement("article");
+        page.className = "page";
+
+        if (index < currentIndex) {
+          page.classList.add("is-hidden");
+        } else if (index === currentIndex) {
+          page.classList.add("is-current");
+        } else if (index === currentIndex + 1) {
+          page.classList.add("is-next");
+        } else {
+          page.classList.add("is-prev");
+        }
+
+        page.innerHTML = `
+          <div class="page-content">
+            <div class="page-number">${index + 1} / ${quotes.length}</div>
+            <blockquote class="quote">“${entry.quote}”</blockquote>
+            <img class="signature-image" src="signature-z.png" alt="İmza">
+            <div class="controls" aria-label="Sayfa kontrolleri">
+              <button class="control-arrow prev-inline" type="button" data-nav="prev" aria-label="Önceki sayfa">←</button>
+              <button class="control-arrow next-inline" type="button" data-nav="next" aria-label="Sonraki sayfa">→</button>
+            </div>
+          </div>
+        `;
+
+        pageStack.appendChild(page);
+      });
+
+      pageStack.querySelectorAll("[data-nav='prev']").forEach((button, index) => {
+        button.addEventListener("click", () => {
+          if (currentIndex === index) {
+            goToPage(currentIndex - 1);
+          }
+        });
+      });
+
+      pageStack.querySelectorAll("[data-nav='next']").forEach((button, index) => {
+        button.addEventListener("click", () => {
+          if (currentIndex === index) {
+            goToPage(currentIndex + 1);
+          }
+        });
+      });
+    }
+
+    function updateBook() {
+      const pages = pageStack.querySelectorAll(".page");
+
+      pages.forEach((page, index) => {
+        page.classList.remove("is-hidden", "is-current", "is-next", "is-prev");
+
+        if (index < currentIndex) {
+          page.classList.add("is-hidden");
+        } else if (index === currentIndex) {
+          page.classList.add("is-current");
+        } else if (index === currentIndex + 1) {
+          page.classList.add("is-next");
+        } else {
+          page.classList.add("is-prev");
+        }
+      });
+
+      const prevButtons = pageStack.querySelectorAll("[data-nav='prev']");
+      const nextButtons = pageStack.querySelectorAll("[data-nav='next']");
+
+      prevButtons.forEach((button, index) => {
+        button.disabled = index !== currentIndex || currentIndex === 0;
+      });
+
+      nextButtons.forEach((button, index) => {
+        button.disabled = index !== currentIndex || currentIndex === quotes.length - 1;
+      });
+    }
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" && currentIndex < quotes.length - 1) {
+        goToPage(currentIndex + 1);
+      }
+
+      if (event.key === "ArrowLeft" && currentIndex > 0) {
+        goToPage(currentIndex - 1);
+      }
+    });
+
+    let touchStartX = 0;
+    pageStack.addEventListener("touchstart", (event) => {
+      touchStartX = event.changedTouches[0].clientX;
+    }, { passive: true });
+
+    pageStack.addEventListener("touchend", (event) => {
+      const deltaX = event.changedTouches[0].clientX - touchStartX;
+      if (deltaX < -40 && currentIndex < quotes.length - 1) {
+        goToPage(currentIndex + 1);
+      }
+      if (deltaX > 40 && currentIndex > 0) {
+        goToPage(currentIndex - 1);
+      }
+    }, { passive: true });
+
+    unlockButton.addEventListener("click", () => {
+      if (adminPassword.value === ADMIN_PASSWORD) {
+        adminEditor.hidden = false;
+        adminStatus.textContent = "Panel açıldı.";
+        populatePageSelect();
+        syncEditorFields();
+        adminPassword.value = "";
+        return;
+      }
+
+      adminStatus.textContent = "Şifre yanlış.";
+    });
+
+    adminToggle.addEventListener("click", () => {
+      adminPanel.classList.toggle("is-open");
+    });
+
+    pageSelect.addEventListener("change", () => {
+      const selected = Number(pageSelect.value);
+      currentIndex = selected;
+      updateBook();
+      syncEditorFields();
+    });
+
+    saveButton.addEventListener("click", () => {
+      quotes[currentIndex] = {
+        quote: quoteInput.value.trim() || getDefaultEntry(currentIndex).quote,
+        note: authorInput.value.trim() || getDefaultEntry(currentIndex).note
+      };
+      saveQuotes();
+      renderPages();
+      updateBook();
+      syncEditorFields();
+      editorStatus.textContent = `Sayfa ${currentIndex + 1} kaydedildi.`;
+    });
+
+    addPageButton.addEventListener("click", () => {
+      quotes.push({ ...BLANK_PAGE });
+      currentIndex = quotes.length - 1;
+      saveQuotes();
+      renderPages();
+      updateBook();
+      populatePageSelect();
+      syncEditorFields();
+      editorStatus.textContent = `Yeni sayfa eklendi. Toplam ${quotes.length} sayfa oldu.`;
+    });
+
+    resetPageButton.addEventListener("click", () => {
+      quotes[currentIndex] = getDefaultEntry(currentIndex);
+      saveQuotes();
+      renderPages();
+      updateBook();
+      syncEditorFields();
+      editorStatus.textContent = `Sayfa ${currentIndex + 1} varsayılana döndü.`;
+    });
+
+    resetAllButton.addEventListener("click", () => {
+      quotes = defaultQuotes.map((entry) => ({ ...entry }));
+      saveQuotes();
+      renderPages();
+      updateBook();
+      syncEditorFields();
+      editorStatus.textContent = "Tüm şiirler varsayılan hâline döndü.";
+    });
+
+    renderPages();
+    updateBook();
+  </script>
+</body>
+</html>
