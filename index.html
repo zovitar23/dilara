@@ -576,7 +576,11 @@
             <button class="admin-button" id="saveButton" type="button">Kaydet</button>
             <button class="admin-button" id="resetPageButton" type="button">Bu Sayfayı Sıfırla</button>
             <button class="admin-button" id="resetAllButton" type="button">Hepsini Sıfırla</button>
+            <button class="admin-button" id="exportButton" type="button">Dışa Aktar</button>
+            <button class="admin-button" id="importButton" type="button">İçe Aktar</button>
           </div>
+          <label class="admin-label" for="importExportBox">Yedek Veri</label>
+          <textarea class="admin-textarea" id="importExportBox" placeholder="Dışa aktarılan veriyi buraya kopyalayabilir veya buradaki veriyi içe aktarabilirsin."></textarea>
           <div class="admin-status" id="editorStatus"></div>
         </div>
       </aside>
@@ -593,84 +597,84 @@
 
     const defaultQuotes = [
       {
-        quote: "Sevelim sevilelim, dünya kimseye kalmaz.",
-        note: "Yunus Emre"
+        quote: "Tanrının en güzel eseri..",
+        note: "zovi"
       },
       {
-        quote: "Aşk imiş her ne var âlemde.",
-        note: "Fuzûlî"
+        quote: "Evren güzelliğini görse, evren oluşundan utanır.",
+        note: "zovi"
       },
       {
-        quote: "Canı cânâna vermekdir kemâli âşıkın.",
+        quote: "Korkuyorum, gözlerin başka gözlerle denk düşer diye.",
         note: "Şeyh Gâlib"
       },
       {
-        quote: "Ben yürürüm yâne yâne.",
-        note: "Yunus Emre"
+        quote: "Aklın beni şair yaptı, kalbim seni şiir yaptı.",
+        note: "Zovi"
       },
       {
-        quote: "Bana seni gerek seni.",
-        note: "Yunus Emre"
+        quote: "Bana bi sen gerek, birde asırlar.",
+        note: "zovi"
       },
       {
         quote: "Seni ben canımın içinde saklarım.",
-        note: "Yunus Emre"
+        note: "zovi"
       },
       {
         quote: "Aşkın aldı benden beni.",
+        note: "zovi"
+      },
+      {
+        quote: "Göğe bakma sevgilim, kuşlar kalbini yuva sanmasın.",
         note: "Yunus Emre"
       },
       {
-        quote: "Bir ben vardır bende benden içeri.",
-        note: "Yunus Emre"
+        quote: "Aşkın yolunda can vermeye, bin can isterim.",
+        note: "Zovi"
       },
       {
-        quote: "Yâr yolunda can vermeye bin cânım olsun isterim.",
-        note: "Fuzûlî"
+        quote: "Aşığa memleket sorulmaz. Kalbin neredeyse vatan odur.",
+        note: "zovi"
       },
       {
-        quote: "Âşıka Bağdat sorulmaz, gönül neredeyse vatan odur.",
-        note: "Fuzûlî"
-      },
-      {
-        quote: "Sensiz bana cihan nedir, bir tenha köşeden ibaret.",
-        note: "Fuzûlî"
+        quote: "Sen yokken dünya nedir ki? Bomboş bi taştan ibaret.",
+        note: "Zovi"
       },
       {
         quote: "Gönlümün tahtına senden başka sultan gerekmez.",
-        note: "Şeyh Gâlib"
+        note: "Zovi"
       },
       {
         quote: "Bir ateş yakmışım ki içimde, adı sen.",
-        note: "Şeyh Gâlib"
+        note: "Zovi"
       },
       {
         quote: "Sana vardığım yerde bütün yollar biter.",
-        note: "Şeyh Gâlib"
+        note: "Zovi"
       },
       {
-        quote: "Gözlerin değince dünya biraz daha güzel oluyor.",
+        quote: "Ayak basmasaydın, ne kıymeti olurdu bu cihanın?",
         note: "Anonim"
       },
       {
-        quote: "Adını andığım her yerde içim biraz daha sana dönüyor.",
+        quote: "Adımı fısıldasan, hissederim dudaklarındaki melodiyi.",
         note: "Anonim"
       },
       {
-        quote: "Bir çift gözde kaybolup bütün dünyayı unuttum.",
+        quote: "Gel gör, dolaş kalbimde. Bulamazsın senden başka kimseleri.",
         note: "Anonim"
       },
       {
         quote: "Kalbim sana alışmadı, kalbim seni yuva bildi.",
-        note: "Anonim"
+        note: "Zovi"
       },
       {
-        quote: "Sen yanımda olunca susmak bile şiir gibi.",
+        quote: "Gel, beraber olalım…\nSussak bile, sessizliğimiz konuşur.",
         note: "Anonim"
       },
       {
         quote: "İçimde en çok sana benzeyen yer kalbim oldu.",
-        note: "Anonim"
+        note: "zovi"
       }
     ];
 
@@ -707,6 +711,9 @@
     const saveButton = document.getElementById("saveButton");
     const resetPageButton = document.getElementById("resetPageButton");
     const resetAllButton = document.getElementById("resetAllButton");
+    const exportButton = document.getElementById("exportButton");
+    const importButton = document.getElementById("importButton");
+    const importExportBox = document.getElementById("importExportBox");
     const editorStatus = document.getElementById("editorStatus");
     let currentIndex = 0;
     let audioContext;
@@ -963,6 +970,42 @@
       updateBook();
       syncEditorFields();
       editorStatus.textContent = "Tüm şiirler varsayılan hâline döndü.";
+    });
+
+    exportButton.addEventListener("click", async () => {
+      const payload = JSON.stringify(quotes, null, 2);
+      importExportBox.value = payload;
+      try {
+        await navigator.clipboard.writeText(payload);
+        editorStatus.textContent = "Veriler dışa aktarıldı ve panoya kopyalandı.";
+      } catch {
+        editorStatus.textContent = "Veriler kutuya aktarıldı. İstersen elle kopyalayabilirsin.";
+      }
+    });
+
+    importButton.addEventListener("click", () => {
+      try {
+        const parsed = JSON.parse(importExportBox.value);
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+          editorStatus.textContent = "Geçerli bir veri bulunamadı.";
+          return;
+        }
+
+        quotes = parsed.map((entry, index) => ({
+          quote: entry.quote || defaultQuotes[index]?.quote || BLANK_PAGE.quote,
+          note: entry.note || defaultQuotes[index]?.note || BLANK_PAGE.note
+        }));
+
+        currentIndex = Math.min(currentIndex, quotes.length - 1);
+        saveQuotes();
+        renderPages();
+        updateBook();
+        populatePageSelect();
+        syncEditorFields();
+        editorStatus.textContent = "Veriler içe aktarıldı.";
+      } catch {
+        editorStatus.textContent = "JSON biçimi geçersiz.";
+      }
     });
 
     renderPages();
