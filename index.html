@@ -68,6 +68,45 @@
       z-index: -2;
     }
 
+    body > .ambient-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .ambient-glow::before,
+    .ambient-glow::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(70px);
+      opacity: 0.28;
+      animation: bloomShift 16s ease-in-out infinite alternate;
+    }
+
+    .ambient-glow::before {
+      width: 34vw;
+      height: 34vw;
+      min-width: 260px;
+      min-height: 260px;
+      top: 8%;
+      left: 4%;
+      background: radial-gradient(circle, rgba(155, 112, 220, 0.36), transparent 68%);
+    }
+
+    .ambient-glow::after {
+      width: 28vw;
+      height: 28vw;
+      min-width: 220px;
+      min-height: 220px;
+      right: 8%;
+      bottom: 6%;
+      background: radial-gradient(circle, rgba(120, 228, 232, 0.18), transparent 70%);
+      animation-duration: 19s;
+    }
+
     .heart-rain {
       position: fixed;
       inset: 0;
@@ -151,6 +190,7 @@
     .layout {
       width: min(1000px, 100%);
       position: relative;
+      transform: perspective(1600px) rotateX(1.4deg);
     }
 
     .book {
@@ -167,12 +207,20 @@
       box-shadow: 0 30px 90px rgba(5, 3, 11, 0.58);
       overflow: hidden;
       isolation: isolate;
+      transform: translateY(0);
+      transition: transform 480ms ease, box-shadow 480ms ease, border-color 480ms ease;
+    }
+
+    .book:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 38px 110px rgba(5, 3, 11, 0.62);
+      border-color: rgba(190, 240, 242, 0.14);
     }
 
     .music-toggle,
     .admin-toggle {
       position: fixed;
-      top: 22px;
+      top: max(6px, env(safe-area-inset-top));
       z-index: 31;
       border: 1px solid rgba(190, 240, 242, 0.12);
       background:
@@ -188,11 +236,49 @@
     }
 
     .music-toggle {
-      left: 22px;
+      left: max(6px, env(safe-area-inset-left));
       min-width: 82px;
       height: 44px;
       border-radius: 999px;
       padding: 0 16px;
+    }
+
+    .love-counter {
+      position: fixed;
+      right: max(6px, env(safe-area-inset-right));
+      bottom: max(6px, env(safe-area-inset-bottom));
+      z-index: 31;
+      padding: 14px 18px;
+      min-width: 180px;
+      border-radius: 18px;
+      border: 1px solid rgba(190, 240, 242, 0.12);
+      background:
+        linear-gradient(180deg, rgba(146, 108, 201, 0.22), rgba(24, 18, 38, 0.86));
+      box-shadow: 0 10px 28px rgba(8, 5, 16, 0.36);
+      backdrop-filter: blur(10px);
+      color: #efe8f5;
+    }
+
+    .love-counter-label {
+      margin: 0 0 6px;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(200, 241, 242, 0.74);
+    }
+
+    .love-counter-value {
+      margin: 0;
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 1.5rem;
+      line-height: 1.1;
+      color: #f8f3fd;
+    }
+
+    .love-counter-note {
+      margin: 6px 0 0;
+      font-size: 0.88rem;
+      color: rgba(232, 222, 243, 0.74);
     }
 
     .admin-panel {
@@ -223,7 +309,7 @@
     }
 
     .admin-toggle {
-      right: 22px;
+      right: max(6px, env(safe-area-inset-right));
       width: 44px;
       height: 44px;
       border-radius: 999px;
@@ -345,6 +431,17 @@
       pointer-events: none;
     }
 
+    .book > .book-glow {
+      position: absolute;
+      inset: -12%;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(173, 124, 228, 0.12), transparent 28%),
+        radial-gradient(circle at 78% 84%, rgba(142, 232, 234, 0.08), transparent 18%);
+      pointer-events: none;
+      z-index: -1;
+      filter: blur(18px);
+    }
+
     .paper-texture {
       position: absolute;
       inset: 0;
@@ -385,6 +482,7 @@
         filter 900ms ease;
       backface-visibility: hidden;
       overflow: hidden;
+      backdrop-filter: blur(1px);
     }
 
     .page::before {
@@ -417,8 +515,64 @@
       pointer-events: none;
     }
 
+    .page-flip-dust {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 28%, rgba(126, 98, 163, 0.12), transparent 20%),
+        radial-gradient(circle at 74% 34%, rgba(142, 232, 234, 0.08), transparent 16%),
+        radial-gradient(circle at 42% 62%, rgba(85, 64, 118, 0.08), transparent 18%),
+        radial-gradient(circle at 58% 18%, rgba(82, 61, 115, 0.08) 0.8px, transparent 1px),
+        radial-gradient(circle at 30% 72%, rgba(82, 61, 115, 0.08) 0.8px, transparent 1px),
+        radial-gradient(circle at 82% 68%, rgba(82, 61, 115, 0.08) 0.8px, transparent 1px);
+      background-size: auto, auto, auto, 16px 16px, 18px 18px, 20px 20px;
+      mix-blend-mode: multiply;
+      z-index: 2;
+    }
+
+    .page .page-corner {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 76px;
+      height: 76px;
+      background:
+        linear-gradient(315deg, rgba(160, 144, 189, 0.24), rgba(255,255,255,0.04) 48%, transparent 49%);
+      clip-path: polygon(100% 0, 0 100%, 100% 100%);
+      opacity: 0.56;
+      pointer-events: none;
+    }
+
+    .page-meta {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .page-date {
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(92, 73, 122, 0.62);
+      white-space: nowrap;
+      padding-top: 2px;
+    }
+
+    .page-date .infinity {
+      color: #6caeb4;
+      padding-left: 4px;
+    }
+
     .page.is-current::after {
       opacity: 1;
+    }
+
+    .page.is-flipping .page-flip-dust {
+      animation: pageDust 700ms ease-out forwards;
     }
 
     .page.is-hidden {
@@ -441,6 +595,7 @@
       transform: translateX(0) rotateY(0deg) scale(1);
       filter: none;
       z-index: 3;
+      box-shadow: 0 18px 44px rgba(12, 9, 22, 0.24), 0 0 0 1px rgba(255,255,255,0.04);
     }
 
     .page.is-prev {
@@ -462,11 +617,49 @@
       padding-bottom: 58px;
     }
 
+    .page-scribble {
+      position: absolute;
+      z-index: 1;
+      font-family: "Brush Script MT", "Segoe Script", cursive;
+      font-size: clamp(1.15rem, 2vw, 1.7rem);
+      color: rgba(109, 88, 146, 0.22);
+      line-height: 1.1;
+      pointer-events: none;
+      transform: rotate(var(--rotate, -6deg));
+      text-shadow: 0 0 1px rgba(255,255,255,0.12);
+      white-space: pre-line;
+    }
+
+    .page-scribble.is-top {
+      top: 12%;
+      right: 7%;
+      max-width: 18ch;
+      text-align: right;
+    }
+
+    .page-scribble.is-bottom {
+      left: 10%;
+      bottom: 16%;
+      max-width: 16ch;
+    }
+
     .page-number {
       font-size: 0.75rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--muted);
+      position: relative;
+      padding-bottom: 8px;
+    }
+
+    .page-number::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 52px;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(141, 121, 169, 0.55), transparent);
     }
 
     .quote {
@@ -480,6 +673,11 @@
       text-wrap: pretty;
       max-width: 18ch;
       text-shadow: 0 1px 0 rgba(255,255,255,0.26);
+      position: relative;
+    }
+
+    .quote::first-letter {
+      color: #76589b;
     }
 
     .note {
@@ -500,6 +698,12 @@
       filter: grayscale(1) brightness(0.22) sepia(1) hue-rotate(235deg) saturate(1.2);
       margin-left: -18px;
       justify-self: start;
+      transition: transform 300ms ease, opacity 300ms ease, filter 300ms ease;
+    }
+
+    .page.is-current .signature-image {
+      transform: translateY(-2px);
+      opacity: 0.96;
     }
 
     .controls {
@@ -512,6 +716,11 @@
       gap: 26px;
       z-index: 5;
       transform: translateX(-50%);
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 26px rgba(10, 8, 22, 0.1);
     }
 
     .control-arrow {
@@ -554,6 +763,7 @@
 
       .layout {
         width: 100%;
+        transform: none;
       }
 
       .book {
@@ -570,6 +780,13 @@
         width: auto;
       }
 
+      .love-counter {
+        left: auto;
+        right: max(4px, env(safe-area-inset-right));
+        bottom: max(4px, env(safe-area-inset-bottom));
+        min-width: 164px;
+      }
+
       .page-stack {
         inset: 12px 12px 78px;
       }
@@ -580,6 +797,7 @@
 
       .controls {
         bottom: 14px;
+        padding: 4px 12px;
       }
 
       .control-arrow {
@@ -633,18 +851,48 @@
         transform: translate3d(calc(var(--drift, 28px) * -0.5), 122vh, 0) scale(1.04);
       }
     }
+
+    @keyframes bloomShift {
+      from {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      to {
+        transform: translate3d(2vw, -1.2vh, 0) scale(1.08);
+      }
+    }
+
+    @keyframes pageDust {
+      0% {
+        opacity: 0;
+        transform: translateX(-2%) scale(0.98);
+      }
+      25% {
+        opacity: 0.38;
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(3%) scale(1.02);
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="ambient-glow" aria-hidden="true"></div>
   <audio id="backgroundMusic" loop preload="auto">
     <source src="background-music.mp3" type="audio/mpeg">
   </audio>
   <div class="heart-rain" id="heartRain" aria-hidden="true"></div>
+  <button class="music-toggle" id="musicToggle" type="button" aria-label="Müziği oynat veya durdur">Müzik</button>
+  <div class="love-counter" id="loveCounter" aria-label="İlişki gün sayacı">
+    <p class="love-counter-label">Biz</p>
+    <p class="love-counter-value" id="loveCounterValue">2 gündür sevgiliyiz</p>
+    <p class="love-counter-note" id="loveCounterNote">03.04.2026'dan beri</p>
+  </div>
+  <button class="admin-toggle" id="adminToggle" type="button" aria-label="Yönetim panelini aç">✦</button>
   <div class="app">
     <div class="layout">
-      <button class="music-toggle" id="musicToggle" type="button" aria-label="Müziği oynat veya durdur">Müzik</button>
-      <button class="admin-toggle" id="adminToggle" type="button" aria-label="Yönetim panelini aç">✦</button>
       <div class="book" aria-label="Dijital şiir defteri">
+        <div class="book-glow" aria-hidden="true"></div>
         <div class="paper-texture" aria-hidden="true"></div>
         <div class="doodles" aria-hidden="true">
           <svg class="doodle doodle-top-left" viewBox="0 0 120 120">
@@ -710,9 +958,20 @@
   <script>
     const ADMIN_PASSWORD = "DİLARAM";
     const STORAGE_KEY = "love-diary-poems-v2";
+    const RELATIONSHIP_START = new Date("2026-04-03T00:00:00");
     const BLANK_PAGE = {
       quote: "Yeni bir şiir ekle...",
       note: "Anonim"
+    };
+    const PAGE_DATE_LABEL = "03.04.2026";
+    const pageScribbles = {
+      0: { text: "ilk sayfa\nilk heyecan", position: "top", rotate: "-5deg" },
+      2: { text: "gözlerin\nyetiyor", position: "bottom", rotate: "6deg" },
+      5: { text: "bir kalp\niki isim", position: "top", rotate: "-8deg" },
+      8: { text: "D & Z", position: "bottom", rotate: "-4deg" },
+      12: { text: "03.04.2026", position: "top", rotate: "5deg" },
+      16: { text: "hep biraz\nsen", position: "bottom", rotate: "-7deg" },
+      20: { text: "sonsuz gibi", position: "top", rotate: "4deg" }
     };
 
     const defaultQuotes = [
@@ -829,6 +1088,8 @@
     const heartRain = document.getElementById("heartRain");
     const backgroundMusic = document.getElementById("backgroundMusic");
     const musicToggle = document.getElementById("musicToggle");
+    const loveCounterValue = document.getElementById("loveCounterValue");
+    const loveCounterNote = document.getElementById("loveCounterNote");
     backgroundMusic.volume = 0.03;
     const adminToggle = document.getElementById("adminToggle");
     const adminPanel = document.getElementById("adminPanel");
@@ -849,6 +1110,14 @@
     const editorStatus = document.getElementById("editorStatus");
     let currentIndex = 0;
     let audioContext;
+
+    function updateLoveCounter() {
+      const now = new Date();
+      const diff = now.getTime() - RELATIONSHIP_START.getTime();
+      const dayCount = Math.max(1, Math.floor(diff / 86400000) + 1);
+      loveCounterValue.textContent = `${dayCount} gündür sevgiliyiz`;
+      loveCounterNote.textContent = "03.04.2026'dan beri";
+    }
 
     function createHeartRain() {
       const heartCount = window.innerWidth < 768 ? 18 : 32;
@@ -880,7 +1149,7 @@
 
         const letter = document.createElement("span");
         letter.className = "heart-core";
-        letter.innerHTML = "<span>D</span>";
+        letter.innerHTML = `<span>${index % 7 === 0 ? "D & Z" : "D"}</span>`;
 
         heart.appendChild(shape);
         heart.appendChild(letter);
@@ -956,6 +1225,12 @@
 
     function goToPage(nextIndex) {
       if (nextIndex === currentIndex || nextIndex < 0 || nextIndex >= quotes.length) return;
+      const currentPage = pageStack.querySelector(".page.is-current");
+      if (currentPage) {
+        currentPage.classList.remove("is-flipping");
+        void currentPage.offsetWidth;
+        currentPage.classList.add("is-flipping");
+      }
       currentIndex = nextIndex;
       updateBook();
       playPageFlip();
@@ -989,6 +1264,7 @@
       quotes.forEach((entry, index) => {
         const page = document.createElement("article");
         page.className = "page";
+        const scribble = pageScribbles[index];
 
         if (index < currentIndex) {
           page.classList.add("is-hidden");
@@ -1000,9 +1276,12 @@
           page.classList.add("is-prev");
         }
 
-        page.innerHTML = `
+          page.innerHTML = `
           <div class="page-content">
-            <div class="page-number">${index + 1} / ${quotes.length}</div>
+            <div class="page-meta">
+              <div class="page-number">${index + 1} / ${quotes.length}</div>
+              <div class="page-date">${PAGE_DATE_LABEL} <span class="infinity">∞</span></div>
+            </div>
             <blockquote class="quote">“${entry.quote}”</blockquote>
             <img class="signature-image" src="signature-z.png" alt="İmza">
             <div class="controls" aria-label="Sayfa kontrolleri">
@@ -1010,6 +1289,9 @@
               <button class="control-arrow next-inline" type="button" data-nav="next" aria-label="Sonraki sayfa">→</button>
             </div>
           </div>
+          ${scribble ? `<div class="page-scribble is-${scribble.position}" style="--rotate:${scribble.rotate}">${scribble.text}</div>` : ""}
+          <div class="page-flip-dust" aria-hidden="true"></div>
+          <div class="page-corner" aria-hidden="true"></div>
         `;
 
         pageStack.appendChild(page);
@@ -1209,6 +1491,7 @@
     window.addEventListener("resize", createHeartRain);
 
     createHeartRain();
+    updateLoveCounter();
     renderPages();
     updateBook();
   </script>
