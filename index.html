@@ -521,8 +521,12 @@
   </style>
 </head>
 <body>
+  <audio id="backgroundMusic" loop preload="auto">
+    <source src="background-music.mp3" type="audio/mpeg">
+  </audio>
   <div class="app">
     <div class="layout">
+      <button class="music-toggle" id="musicToggle" type="button" aria-label="Müziği oynat veya durdur">Müzik</button>
       <button class="admin-toggle" id="adminToggle" type="button" aria-label="Yönetim panelini aç">✦</button>
       <div class="book" aria-label="Dijital şiir defteri">
         <div class="paper-texture" aria-hidden="true"></div>
@@ -589,7 +593,7 @@
 
   <script>
     const ADMIN_PASSWORD = "DİLARAM";
-    const STORAGE_KEY = "love-diary-poems-v2";
+    const STORAGE_KEY = "love-diary-poems-v1";
     const BLANK_PAGE = {
       quote: "Yeni bir şiir ekle...",
       note: "Anonim"
@@ -597,7 +601,7 @@
 
     const defaultQuotes = [
       {
-        quote: "Tanrının en güzel eseri..",
+        quote: "Bi ressamın en güzel eseri..",
         note: "zovi"
       },
       {
@@ -698,6 +702,8 @@
 
     let quotes = loadQuotes();
     const pageStack = document.getElementById("pageStack");
+    const backgroundMusic = document.getElementById("backgroundMusic");
+    const musicToggle = document.getElementById("musicToggle");
     const adminToggle = document.getElementById("adminToggle");
     const adminPanel = document.getElementById("adminPanel");
     const adminPassword = document.getElementById("adminPassword");
@@ -717,6 +723,15 @@
     const editorStatus = document.getElementById("editorStatus");
     let currentIndex = 0;
     let audioContext;
+
+    async function startBackgroundMusic() {
+      try {
+        await backgroundMusic.play();
+        musicToggle.textContent = "Durdur";
+      } catch {
+        musicToggle.textContent = "Müzik";
+      }
+    }
 
     function playPageFlip() {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -1007,6 +1022,25 @@
         editorStatus.textContent = "JSON biçimi geçersiz.";
       }
     });
+
+    musicToggle.addEventListener("click", async () => {
+      if (backgroundMusic.paused) {
+        await startBackgroundMusic();
+      } else {
+        backgroundMusic.pause();
+        musicToggle.textContent = "Müzik";
+      }
+    });
+
+    window.addEventListener("load", () => {
+      startBackgroundMusic();
+    });
+
+    document.addEventListener("pointerdown", () => {
+      if (backgroundMusic.paused) {
+        startBackgroundMusic();
+      }
+    }, { once: true, passive: true });
 
     renderPages();
     updateBook();
