@@ -1265,14 +1265,15 @@
     }
 
     /* Focus Mode Overlay Transitions */
-    body {
+    body.is-focused {
       transition: background-color 2.5s ease;
+      background-color: #030105 !important;
     }
     
-    body.is-focused .layout-bg {
-      opacity: 0.1;
-      filter: blur(20px);
-      transition: all 2.5s ease;
+    body.is-focused .ambient-glow,
+    body.is-focused::after {
+      opacity: 0.02;
+      transition: opacity 2.5s ease;
     }
     
     body.is-focused .heart-drop,
@@ -1280,13 +1281,15 @@
     body.is-focused .love-counter,
     body.is-focused .music-toggle,
     body.is-focused .twin-star {
-      opacity: 0.02 !important;
+      opacity: 0.01 !important;
+      pointer-events: none;
       transition: opacity 2.5s ease;
     }
     
     body.is-focused .envelope-flap, 
     body.is-focused .wax-seal,
-    body.is-focused .envelope-body {
+    body.is-focused .envelope-body,
+    body.is-focused .introOverlay {
       opacity: 0;
       transition: opacity 2.5s ease;
     }
@@ -1303,19 +1306,27 @@
       opacity: 0;
     }
 
+    body.is-focused .page {
+      background: transparent !important;
+      box-shadow: none !important;
+      border-right: none !important;
+      border-left: none !important;
+      transition: all 2.5s ease;
+    }
+
     body.is-focused .page-number,
     body.is-focused .page-date,
-    body.is-focused .controls {
-      opacity: 0.1;
+    body.is-focused .controls,
+    body.is-focused .signature-image {
+      opacity: 0.01;
       transition: opacity 2.5s ease;
     }
 
     body.is-focused .quote {
-      color: #f1edfa !important;
-      text-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 10px #72e4e7 !important;
-      transform: scale(1.1);
+      color: #fff !important;
+      text-shadow: 0 0 25px rgba(255, 255, 255, 0.4), 0 0 10px #72e4e7, 0 0 40px #9d81c4 !important;
+      transform: scale(1.05);
       transition: all 2.5s ease;
-      mix-blend-mode: normal;
     }
 
     body.is-focused .quote-note {
@@ -1323,7 +1334,6 @@
       text-shadow: 0 0 10px rgba(114, 228, 231, 0.6);
       transition: all 2.5s;
     }
-
 </style>
 </head>
 <body>
