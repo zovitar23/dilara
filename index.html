@@ -6,16 +6,19 @@
   <title>Sessiz Sayfalar</title>
   <style>
     :root {
-      --bg-1: #4b453f;
-      --bg-2: #2f2b28;
-      --paper: #d9d4cd;
-      --paper-edge: #c2bbb1;
-      --ink: #1f1b18;
-      --muted: rgba(31, 27, 24, 0.62);
-      --shadow: 0 30px 90px rgba(8, 8, 8, 0.45);
-      --page-shadow: 0 18px 40px rgba(18, 18, 18, 0.22);
-      --line: rgba(58, 52, 46, 0.18);
-      --accent: #6b625a;
+      --bg-1: #2c2138;
+      --bg-2: #130f1f;
+      --paper: #ebe4f1;
+      --paper-edge: #cdbfdc;
+      --ink: #1e1630;
+      --muted: rgba(46, 31, 67, 0.6);
+      --shadow: 0 30px 90px rgba(5, 3, 11, 0.58);
+      --page-shadow: 0 18px 40px rgba(10, 8, 22, 0.26);
+      --line: rgba(95, 78, 122, 0.2);
+      --accent: #8d79a9;
+      --cyan: #8ee8ea;
+      --cyan-soft: rgba(142, 232, 234, 0.14);
+      --glow-soft: rgba(173, 124, 228, 0.16);
     }
 
     * {
@@ -32,7 +35,9 @@
       font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(circle at center, rgba(255,255,255,0.04), transparent 36%),
+        radial-gradient(circle at 18% 16%, rgba(142,232,234,0.08), transparent 18%),
+        radial-gradient(circle at 78% 28%, rgba(168,118,232,0.13), transparent 30%),
+        radial-gradient(circle at center, rgba(255,255,255,0.03), transparent 36%),
         linear-gradient(180deg, var(--bg-1), var(--bg-2));
       overflow: hidden;
     }
@@ -42,8 +47,8 @@
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.04), transparent 42%),
-        linear-gradient(90deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06), rgba(255,255,255,0.02));
+        radial-gradient(circle at 50% 50%, rgba(170, 132, 229, 0.08), transparent 42%),
+        linear-gradient(90deg, rgba(142,232,234,0.03), rgba(0,0,0,0.08), rgba(170,132,229,0.04));
       opacity: 0.72;
       pointer-events: none;
     }
@@ -63,11 +68,84 @@
       z-index: -2;
     }
 
+    .heart-rain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .heart-drop {
+      position: absolute;
+      top: -18vh;
+      width: var(--size, 28px);
+      height: var(--size, 28px);
+      opacity: 0;
+      transform: translate3d(0, 0, 0);
+      animation: heartFall var(--duration, 16s) linear infinite;
+      animation-delay: var(--delay, 0s);
+      filter: blur(0.15px);
+    }
+
+    .heart-shape {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .heart-shape path {
+      fill: rgba(170, 132, 229, 0.18);
+      stroke: rgba(185, 245, 247, 0.18);
+      stroke-width: 1.4;
+      filter: drop-shadow(0 0 12px rgba(170, 132, 229, 0.16));
+    }
+
+    .heart-drop.is-soft .heart-shape path {
+      fill: rgba(170, 132, 229, 0.11);
+      stroke: rgba(185, 245, 247, 0.09);
+    }
+
+    .heart-drop.is-strong .heart-shape path {
+      fill: rgba(170, 132, 229, 0.24);
+      stroke: rgba(185, 245, 247, 0.22);
+    }
+
+    .heart-core {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: rgba(216, 251, 251, 0.88);
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: calc(var(--size, 28px) * 0.34);
+      font-style: italic;
+      text-shadow: 0 0 8px rgba(185, 245, 247, 0.24);
+      user-select: none;
+      padding-top: 4%;
+    }
+
+    .heart-core span {
+      transform: translateY(-2%);
+    }
+
+    .heart-drop.is-small .heart-core {
+      font-size: calc(var(--size, 28px) * 0.38);
+    }
+
+    .heart-drop.is-large .heart-core {
+      font-size: calc(var(--size, 28px) * 0.3);
+    }
+
     .app {
       min-height: 100vh;
       display: grid;
       place-items: center;
       padding: 28px;
+      position: relative;
+      z-index: 1;
     }
 
     .layout {
@@ -82,13 +160,39 @@
       min-height: 560px;
       max-height: min(82vh, 760px);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.08)),
-        linear-gradient(180deg, rgba(90, 82, 74, 0.16), rgba(34, 31, 28, 0.28));
-      border: 1px solid rgba(255, 255, 255, 0.06);
+        linear-gradient(180deg, rgba(190, 240, 242, 0.04), rgba(0,0,0,0.12)),
+        linear-gradient(180deg, rgba(96, 70, 136, 0.2), rgba(19, 15, 31, 0.4));
+      border: 1px solid rgba(190, 240, 242, 0.08);
       border-radius: 8px;
-      box-shadow: 0 30px 90px rgba(6, 6, 6, 0.5);
+      box-shadow: 0 30px 90px rgba(5, 3, 11, 0.58);
       overflow: hidden;
       isolation: isolate;
+    }
+
+    .music-toggle,
+    .admin-toggle {
+      position: fixed;
+      top: 22px;
+      z-index: 31;
+      border: 1px solid rgba(190, 240, 242, 0.12);
+      background:
+        linear-gradient(180deg, rgba(146, 108, 201, 0.28), rgba(24, 18, 38, 0.84));
+      color: rgba(235, 248, 248, 0.92);
+      box-shadow: 0 0 0 1px rgba(173, 124, 228, 0.08), 0 10px 24px rgba(8, 5, 16, 0.34);
+      cursor: pointer;
+      font: inherit;
+      display: grid;
+      place-items: center;
+      transition: transform 180ms ease, opacity 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .music-toggle {
+      left: 22px;
+      min-width: 82px;
+      height: 44px;
+      border-radius: 999px;
+      padding: 0 16px;
     }
 
     .admin-panel {
@@ -99,12 +203,12 @@
       min-height: 0;
       padding: 22px 18px;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.12)),
-        linear-gradient(180deg, rgba(90, 82, 74, 0.14), rgba(34, 31, 28, 0.32));
-      border: 1px solid rgba(255,255,255,0.06);
+        linear-gradient(180deg, rgba(190, 240, 242, 0.05), rgba(0,0,0,0.16)),
+        linear-gradient(180deg, rgba(96, 70, 136, 0.22), rgba(19, 15, 31, 0.5));
+      border: 1px solid rgba(190,240,242,0.08);
       border-radius: 10px;
-      box-shadow: 0 30px 90px rgba(6, 6, 6, 0.34);
-      color: #e4ddd4;
+      box-shadow: 0 30px 90px rgba(5, 3, 11, 0.42);
+      color: #efe8f5;
       z-index: 30;
       opacity: 0;
       visibility: hidden;
@@ -119,26 +223,17 @@
     }
 
     .admin-toggle {
-      position: fixed;
-      top: 22px;
       right: 22px;
-      z-index: 31;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(24, 21, 19, 0.74);
-      color: rgba(245, 238, 230, 0.8);
       width: 44px;
       height: 44px;
       border-radius: 999px;
-      cursor: pointer;
-      font: inherit;
-      display: grid;
-      place-items: center;
-      transition: transform 180ms ease, opacity 180ms ease, border-color 180ms ease;
     }
 
+    .music-toggle:hover,
     .admin-toggle:hover {
       transform: translateY(-1px);
-      border-color: rgba(255,255,255,0.18);
+      border-color: rgba(190,240,242,0.24);
+      box-shadow: 0 0 0 1px rgba(142, 232, 234, 0.12), 0 12px 28px rgba(8, 5, 16, 0.4);
     }
 
     .admin-panel h2 {
@@ -146,12 +241,12 @@
       font-family: "Georgia", "Times New Roman", serif;
       font-size: 1.55rem;
       font-weight: 500;
-      color: #f2ebe2;
+      color: #f6f0fb;
     }
 
     .admin-text {
       margin: 0 0 18px;
-      color: rgba(228, 221, 212, 0.66);
+      color: rgba(232, 222, 243, 0.74);
       font-size: 0.95rem;
       line-height: 1.7;
     }
@@ -170,16 +265,16 @@
       font-size: 0.82rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: rgba(228, 221, 212, 0.68);
+      color: rgba(200, 241, 242, 0.7);
     }
 
     .admin-input,
     .admin-select,
     .admin-textarea {
       width: 100%;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.06);
-      color: #f5eee6;
+      border: 1px solid rgba(190,240,242,0.1);
+      background: rgba(255,255,255,0.05);
+      color: #f6f0fb;
       border-radius: 10px;
       padding: 12px 14px;
       font: inherit;
@@ -189,8 +284,8 @@
     .admin-input:focus,
     .admin-select:focus,
     .admin-textarea:focus {
-      border-color: rgba(255,255,255,0.18);
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+      border-color: rgba(190,240,242,0.22);
+      box-shadow: 0 0 0 3px rgba(142,232,234,0.08);
     }
 
     .admin-textarea {
@@ -207,9 +302,9 @@
     }
 
     .admin-button {
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(222, 218, 211, 0.12);
-      color: #f5eee6;
+      border: 1px solid rgba(190,240,242,0.1);
+      background: rgba(173, 124, 228, 0.14);
+      color: #f6f0fb;
       padding: 11px 14px;
       border-radius: 999px;
       font: inherit;
@@ -219,13 +314,13 @@
 
     .admin-button:hover {
       transform: translateY(-1px);
-      border-color: rgba(255,255,255,0.18);
+      border-color: rgba(190,240,242,0.24);
     }
 
     .admin-status {
       min-height: 1.4em;
       font-size: 0.9rem;
-      color: rgba(245, 238, 230, 0.72);
+      color: rgba(232, 222, 243, 0.78);
     }
 
     .book::before {
@@ -518,12 +613,31 @@
         transform: translateX(5px);
       }
     }
+
+    @keyframes heartFall {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, -8vh, 0) scale(0.9);
+      }
+      10% {
+        opacity: 5;
+      }
+      50% {
+        opacity: 0.24;
+        transform: translate3d(var(--drift, 28px), 52vh, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(calc(var(--drift, 28px) * -0.5), 122vh, 0) scale(1.04);
+      }
+    }
   </style>
 </head>
 <body>
   <audio id="backgroundMusic" loop preload="auto">
     <source src="background-music.mp3" type="audio/mpeg">
   </audio>
+  <div class="heart-rain" id="heartRain" aria-hidden="true"></div>
   <div class="app">
     <div class="layout">
       <button class="music-toggle" id="musicToggle" type="button" aria-label="Müziği oynat veya durdur">Müzik</button>
@@ -704,6 +818,7 @@
 
     let quotes = loadQuotes();
     const pageStack = document.getElementById("pageStack");
+    const heartRain = document.getElementById("heartRain");
     const backgroundMusic = document.getElementById("backgroundMusic");
     const musicToggle = document.getElementById("musicToggle");
     backgroundMusic.volume = 0.03;
@@ -726,6 +841,44 @@
     const editorStatus = document.getElementById("editorStatus");
     let currentIndex = 0;
     let audioContext;
+
+    function createHeartRain() {
+      const heartCount = window.innerWidth < 768 ? 18 : 32;
+      heartRain.innerHTML = "";
+
+      for (let index = 0; index < heartCount; index += 1) {
+        const heart = document.createElement("span");
+        heart.className = "heart-drop";
+        if (index % 3 === 0) heart.classList.add("is-soft");
+        if (index % 5 === 0) heart.classList.add("is-strong");
+        heart.style.left = `${Math.random() * 100}%`;
+        heart.style.setProperty("--size", `${18 + Math.random() * 26}px`);
+        heart.style.setProperty("--duration", `${13 + Math.random() * 11}s`);
+        heart.style.setProperty("--delay", `${Math.random() * -22}s`);
+        heart.style.setProperty("--drift", `${-40 + Math.random() * 80}px`);
+        if (parseFloat(heart.style.getPropertyValue("--size")) < 28) {
+          heart.classList.add("is-small");
+        } else if (parseFloat(heart.style.getPropertyValue("--size")) > 36) {
+          heart.classList.add("is-large");
+        }
+
+        const shape = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        shape.setAttribute("class", "heart-shape");
+        shape.setAttribute("viewBox", "0 0 64 64");
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", "M32 57C19 47 8 39 8 24C8 15 14.5 8 23.5 8C28.8 8 32.4 10.8 32 15.5C31.6 10.8 35.2 8 40.5 8C49.5 8 56 15 56 24C56 39 45 47 32 57Z");
+        shape.appendChild(path);
+
+        const letter = document.createElement("span");
+        letter.className = "heart-core";
+        letter.innerHTML = "<span>D</span>";
+
+        heart.appendChild(shape);
+        heart.appendChild(letter);
+        heartRain.appendChild(heart);
+      }
+    }
 
     async function startBackgroundMusic() {
       try {
@@ -1045,6 +1198,9 @@
       }
     }, { once: true, passive: true });
 
+    window.addEventListener("resize", createHeartRain);
+
+    createHeartRain();
     renderPages();
     updateBook();
   </script>
